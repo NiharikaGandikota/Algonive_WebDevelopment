@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Manager</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f9f9f9, #e0f7fa);
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    h2 {
+      text-align: center;
+      color: #00796b;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    input:focus, textarea:focus {
+      border-color: #00796b;
+      outline: none;
+    }
+    button {
+      background-color: #00796b;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #004d40;
+    }
+    .task {
+      background: #f1f8e9;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+    .task:hover {
+      transform: scale(1.01);
+    }
+    .complete {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .filters {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+    }
+    .filters button {
+      width: 32%;
+      background-color: #26a69a;
+    }
+    .filters button:hover {
+      background-color: #1e857d;
+    }
+    small {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Task Manager </h2>
+  <input id="title" type="text" placeholder="What's your task?" />
+  <textarea id="desc" placeholder="Describe your task in detail..."></textarea>
+  <input id="date" type="date" />
+  <button onclick="addTask()">➕ Add Task</button>
+
+  <div class="filters">
+    <button onclick="filterTasks('all')">All Tasks</button>
+    <button onclick="filterTasks('complete')">Completed</button>
+    <button onclick="filterTasks('incomplete')">Pending</button>
+  </div>
+
+  <div id="taskList"></div>
+</div>
+
+<script>
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+function saveTasks() {
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function addTask() {
+  const title = document.getElementById('title').value.trim();
+  const desc = document.getElementById('desc').value.trim();
+  const date = document.getElementById('date').value;
+  if (title && date) {
+    tasks.push({ title, desc, date, complete: false });
+    saveTasks();
+    displayTasks();
+    document.getElementById('title').value = '';
+    document.getElementById('desc').value = '';
+    document.getElementById('date').value = '';
+  } else {
+    alert('Please enter a task title and due date.');
+  }
+}
+
+function deleteTask(index) {
+  tasks.splice(index, 1);
+  saveTasks();
+  displayTasks();
+}
+
+function toggleComplete(index) {
+  tasks[index].complete = !tasks[index].complete;
+  saveTasks();
+  displayTasks();
+}
+
+function editTask(index) {
+  const task = tasks[index];
+  document.getElementById('title').value = task.title;
+  document.getElementById('desc').value = task.desc;
+  document.getElementById('date').value = task.date;
+  deleteTask(index);
+}
+
+function displayTasks(filter = 'all') {
+  const list = document.getElementById('taskList');
+  list.innerHTML = '';
+  tasks.forEach((task, i) => {
+    if (filter === 'complete' && !task.complete) return;
+    if (filter === 'incomplete' && task.complete) return;
+
+    const div = document.createElement('div');
+    div.className = 'task' + (task.complete ? ' complete' : '');
+    div.innerHTML = `
+      <strong>${task.title}</strong><br>
+      ${task.desc}<br>
+      <small>Due: ${task.date}</small><br><br>
+      <button onclick="toggleComplete(${i})">${task.complete ? 'Mark Incomplete' : 'Mark Complete'}</button>
+      <button onclick="editTask(${i})"> Edit</button>
+      <button onclick="deleteTask(${i})"> Delete</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function filterTasks(type) {
+  displayTasks(type);
+}
+
+function checkReminders() {
+  const today = new Date().toISOString().split('T')[0];
+  tasks.forEach(task => {
+    const taskDate = task.date;
+    if (!task.complete && taskDate <= today) {
+      alert(` Reminder: "${task.title}" is due or overdue!`);
+    }
+  });
+}
+
+window.onload = () => {
+  displayTasks();
+  checkReminders();
+};
+</script>
+</body>
+</html>
