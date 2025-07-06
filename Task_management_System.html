@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Task Manager</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #eef2f3;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    h2, h3 {
+      color: #34495e;
+      text-align: center;
+    }
+    input, select, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    .task {
+      background: #ecf0f1;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .status {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Small Team Task Manager</h2>
+  <div id="authSection">
+    <h3>Login</h3>
+    <input id="username" placeholder="Enter your username">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div id="taskSection" style="display:none">
+    <h3>Welcome, <span id="userDisplay"></span></h3>
+    <input id="taskTitle" placeholder="Task Title">
+    <input id="taskAssignee" placeholder="Assign to (username)">
+    <select id="taskStatus">
+      <option value="Pending">Pending</option>
+      <option value="In Progress">In Progress</option>
+      <option value="Completed">Completed</option>
+    </select>
+    <input id="taskDue" type="date">
+    <button onclick="addTask()">Add Task</button>
+
+    <h3>Team Tasks</h3>
+    <div id="taskList"></div>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+let teamTasks = JSON.parse(localStorage.getItem('teamTasks')) || [];
+
+function login() {
+  const username = document.getElementById('username').value.trim();
+  if (username) {
+    currentUser = username;
+    document.getElementById('authSection').style.display = 'none';
+    document.getElementById('taskSection').style.display = 'block';
+    document.getElementById('userDisplay').innerText = currentUser;
+    showTasks();
+  }
+}
+
+function addTask() {
+  const title = document.getElementById('taskTitle').value.trim();
+  const assignee = document.getElementById('taskAssignee').value.trim();
+  const status = document.getElementById('taskStatus').value;
+  const due = document.getElementById('taskDue').value;
+  
+  if (title && assignee && due) {
+    teamTasks.push({ title, assignee, status, due });
+    localStorage.setItem('teamTasks', JSON.stringify(teamTasks));
+    showTasks();
+    document.getElementById('taskTitle').value = '';
+    document.getElementById('taskAssignee').value = '';
+    document.getElementById('taskDue').value = '';
+  } else {
+    alert('Fill in all task fields.');
+  }
+}
+
+function showTasks() {
+  const container = document.getElementById('taskList');
+  container.innerHTML = '';
+  const today = new Date().toISOString().split('T')[0];
+
+  teamTasks.forEach((task, index) => {
+    // Display all tasks regardless of assignee
+    if (true) {
+      const div = document.createElement('div');
+      div.className = 'task';
+      div.innerHTML = `
+        <strong>${task.title}</strong><br>
+        Assigned to: ${task.assignee}<br>
+        Status: <span class="status">${task.status}</span><br>
+        Due: ${task.due}<br>
+        ${task.due <= today && task.status !== 'Completed' ? '<strong style="color:red">⚠️ Reminder: Due Soon</strong><br>' : ''}
+        <button onclick="updateStatus(${index})">Update Status</button>
+        <button onclick="deleteTask(${index})">Delete</button>
+      `;
+      container.appendChild(div);
+    }
+  });
+}
+
+function updateStatus(index) {
+  const newStatus = prompt('Enter new status (Pending, In Progress, Completed):', teamTasks[index].status);
+  if (newStatus) {
+    teamTasks[index].status = newStatus;
+    localStorage.setItem('teamTasks', JSON.stringify(teamTasks));
+    showTasks();
+  }
+}
+
+function deleteTask(index) {
+  teamTasks.splice(index, 1);
+  localStorage.setItem('teamTasks', JSON.stringify(teamTasks));
+  showTasks();
+}
+</script>
+</body>
+</html>
