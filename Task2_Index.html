@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>WhatsApp-like Chat</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"> Group Chat</div>
+    <div id="who" class="who"></div>
+  </header>
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="panel">
+        <div class="title">Rooms</div>
+        <div id="rooms" class="list"></div>
+      </div>
+      <div class="panel">
+        <div class="title">People <span id="onlineCount"></span></div>
+        <div id="people" class="list"></div>
+      </div>
+    </aside>
+    <section class="chat">
+      <header class="chatbar">
+        <div id="chatTitle">Select a chat</div>
+        <div id="typing" class="typing" hidden></div>
+      </header>
+      <div id="messages" class="messages"></div>
+      <form id="composer" class="composer">
+        <input id="msg" placeholder="Type a message…" autocomplete="off"/>
+        <button class="send" type="submit">Send</button>
+      </form>
+    </section>
+  </main>
+  <!-- Login modal -->
+  <div class="modal" id="loginModal">
+    <div class="modal-card">
+      <h3>Welcome 👋</h3>
+      <p class="hint">Choose a unique username</p>
+      <input id="username" placeholder="e.g. niharika"/>
+      <button id="joinBtn" class="send">Join</button>
+      <div id="loginError" class="error"></div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
